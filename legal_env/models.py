@@ -35,7 +35,7 @@ class LegalObservation(BaseModel):
     feedback: Optional[str] = None
     step_number: int = 0
     max_steps: int = 3
-    reward_breakdown: Optional[Dict[str, float]] = None
+    reward_breakdown: Optional[Dict[str, Any]] = None
 
 
 class LegalEnvironmentState(BaseModel):
