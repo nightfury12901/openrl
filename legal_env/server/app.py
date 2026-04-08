@@ -1,16 +1,29 @@
 """
 FastAPI Application for the Legal Case Assistant OpenEnv Environment.
-
-Exposes HTTP endpoints as strictly defined by `openenv-core`.
 """
-
-from __future__ import annotations
-
-from openenv.core.env_server import create_fastapi_app
-from legal_env.models import LegalAction, LegalObservation
+from fastapi import FastAPI
+from legal_env.models import LegalAction, LegalObservation, LegalEnvironmentState
 from legal_env.server.legal_environment import LegalEnvironment
 
 env = LegalEnvironment()
+app = FastAPI(title="Legal Case Assistant", version="1.0.0")
 
-# Standard OpenEnv FastAPI server hook. Automatically manages /reset, /step, /state, and /health
-app = create_fastapi_app(env, LegalAction, LegalObservation)
+
+@app.post("/reset", response_model=LegalObservation)
+def reset():
+    return env.reset()
+
+
+@app.post("/step", response_model=LegalObservation)
+def step(action: LegalAction):
+    return env.step(action)
+
+
+@app.get("/state", response_model=LegalEnvironmentState)
+def state():
+    return env.state
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
