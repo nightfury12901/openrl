@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import uuid
 from typing import Any, Optional
-
-from openenv.core.env_server import Environment
+from openenv_core.env_server.types import Action, Observation, State
+from openenv_core.env_server import Environment
 
 from legal_env.models import (
     LegalAction,
