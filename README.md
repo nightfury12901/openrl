@@ -1,3 +1,15 @@
+---
+title: AI Legal Case Assistant
+emoji: ⚖️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 8000
+pinned: false
+tags:
+  - openenv
+---
+
 # AI Legal Case Assistant + Contract Clause Optimizer
 
 > An **OpenEnv-compliant** environment for evaluating structured legal reasoning capabilities of AI agents — covering case classification, contract risk detection, and clause optimization.
@@ -102,7 +114,23 @@ The agent submits a `LegalAction` with a single `response` field containing its 
 
 ---
 
-## 5. Reward Function Logic
+## 5. OpenEnv Interface Compliance
+
+This environment fully implements the OpenEnv specification:
+
+| Method | Description |
+|--------|-------------|
+| `reset()` | Returns the initial `LegalObservation` for Task 1 |
+| `step(action)` | Accepts a `LegalAction`, returns `(observation, reward, done, info)` |
+| `state()` | Returns the full current environment state |
+
+All models are typed using **Pydantic v2**. The environment passes `openenv validate` successfully.
+
+An `openenv.yaml` manifest is included in the repository root.
+
+---
+
+## 6. Reward Function Logic
 
 The reward function computes a composite score in **[0.0, 1.0]**:
 
@@ -123,13 +151,14 @@ total = 0.5 × structural_score + 0.5 × content_score
 
 ### Rules
 - Response under 15 words → **heavy penalty (−0.4)**
-- Same response repeated → **score = 0**
+- Same response repeated → **score forced to 0**
 - Earlier steps → higher bonus (incentivizes first-attempt quality)
 - Final score always clipped to **[0.0, 1.0]**
+- Reward is provided **at every step**, not just at task completion — enabling incremental learning
 
 ---
 
-## 6. Setup Instructions
+## 7. Setup Instructions
 
 ### Prerequisites
 - Python 3.11+
@@ -169,7 +198,7 @@ Then visit: `http://localhost:8000/docs` for interactive API documentation.
 
 ---
 
-## 7. Docker Usage
+## 8. Docker Usage
 
 ### Build
 
@@ -186,13 +215,13 @@ docker run -p 8000:8000 legal-case-assistant:latest
 ### Run (Inference)
 
 ```bash
-export HF_TOKEN="hf_your_token" legal-case-assistant:latest \
+docker run -e HF_TOKEN="hf_your_token" legal-case-assistant:latest \
     python inference.py
 ```
 
 ---
 
-## 8. Baseline Results
+## 9. Baseline Results
 
 Results from evaluating `Meta-Llama-3-8B-Instruct` via the HuggingFace Serverless Inference Router (`router.huggingface.co/v1`) using the standard OpenAI Python client with `temperature=0`, `seed=42`:
 
@@ -207,7 +236,7 @@ Results from evaluating `Meta-Llama-3-8B-Instruct` via the HuggingFace Serverles
 
 ---
 
-## 9. Hugging Face Deployment
+## 10. Hugging Face Deployment
 
 ### Steps to Deploy
 
@@ -215,49 +244,22 @@ Results from evaluating `Meta-Llama-3-8B-Instruct` via the HuggingFace Serverles
    - Select **Docker** as the SDK
    - Choose a descriptive name (e.g., `legal-case-assistant`)
 
-2. **Add the `openenv` tag** to your Space metadata
+2. **Add the `openenv` tag** to your Space metadata (already included in this README's front-matter)
 
 3. **Set `HF_TOKEN` as a Secret**
    - Go to Settings → Repository Secrets → Add `HF_TOKEN` with your Hugging Face Access Token.
 
 4. **Push your code** to the Space repository:
    ```bash
-   git remote add hf https://huggingface.co/spaces/yourusername/legal-case-assistant
+   git remote add hf https://huggingface.co/spaces/Nightfury12901/legal-case-assistant
    git push hf main
    ```
 
-5. The Dockerfile will automatically build and deploy the FastAPI server.
-
-### Space Configuration
-
-Ensure your Space README front-matter includes:
-```yaml
----
-title: AI Legal Case Assistant
-emoji: ⚖️
-colorFrom: blue
-colorTo: purple
-sdk: docker
-app_port: 8000
-tags:
-  - openenv
----
-```
+5. The Dockerfile will automatically build and deploy the FastAPI server on port `8000`.
 
 ---
 
-## 10. References
-
-- **OpenEnv Framework**: [github.com/meta-pytorch/OpenEnv](https://github.com/meta-pytorch/OpenEnv)
-- **Pydantic v2**: [docs.pydantic.dev](https://docs.pydantic.dev)
-- **FastAPI**: [fastapi.tiangolo.com](https://fastapi.tiangolo.com)
-- **Title VII of the Civil Rights Act**: [EEOC](https://www.eeoc.gov/statutes/title-vii-civil-rights-act-1964)
-- **California FEHA**: [dfeh.ca.gov](https://www.dfeh.ca.gov)
-- **Restatement (Second) of Contracts**: American Law Institute
-
----
-
-## Project Structure
+## 11. Project Structure
 
 ```
 legal-case-assistant-openenv/
@@ -286,17 +288,17 @@ legal-case-assistant-openenv/
 
 ---
 
+## 12. References
+
+- **OpenEnv Framework**: [github.com/meta-pytorch/OpenEnv](https://github.com/meta-pytorch/OpenEnv)
+- **Pydantic v2**: [docs.pydantic.dev](https://docs.pydantic.dev)
+- **FastAPI**: [fastapi.tiangolo.com](https://fastapi.tiangolo.com)
+- **Title VII of the Civil Rights Act**: [EEOC](https://www.eeoc.gov/statutes/title-vii-civil-rights-act-1964)
+- **California FEHA**: [dfeh.ca.gov](https://www.dfeh.ca.gov)
+- **Restatement (Second) of Contracts**: American Law Institute
+
+---
+
 ## License
 
 MIT
-
----
-title: Legal Case Assistant
-emoji: 📚
-colorFrom: red
-colorTo: indigo
-sdk: docker
-pinned: false
----
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
